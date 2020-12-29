@@ -1,6 +1,6 @@
 #include"Graphics.h"
 
-void framebuffer_t::framebuffer_clear_color(vec4_t color) {
+void framebuffer_t::framebuffer_clear_color(Vec4f color) {
     int num_elems = this->width * this->height;
     int i;
     for (i = 0; i < num_elems; i++) {
@@ -15,7 +15,7 @@ void framebuffer_t::framebuffer_clear_depth(float depth) {
         this->depthbuffer[i] = depth;
     }
 }
-void framebuffer_t::set(int x, int y, vec4_t color)
+void framebuffer_t::set(int x, int y, Vec4f color)
 {
     if (x < 0 || y < 0 || x >=this->width ||y>=this->height )
         return;
@@ -27,7 +27,7 @@ void framebuffer_t::set(int x, int y, vec4_t color)
        
 }
 framebuffer_t::framebuffer_t(int width, int height) {
-    vec4_t default_color = { 0.0,0.0,0.0, 1 };
+    Vec4f default_color = { 0.0,0.0,0.0, 1 };
     float default_depth = 1;
     int num_elems = width * height;
    
@@ -37,7 +37,7 @@ framebuffer_t::framebuffer_t(int width, int height) {
  
     this->width = width;
     this->height = height;
-    this->colorbuffer = (vec4_t*)malloc(sizeof(vec4_t) * num_elems);
+    this->colorbuffer = (Vec4f*)malloc(sizeof(Vec4f) * num_elems);
     this->depthbuffer = (float*)malloc(sizeof(float) * num_elems);
 
     framebuffer_clear_color(default_color);

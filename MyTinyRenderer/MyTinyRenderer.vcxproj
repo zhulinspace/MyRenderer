@@ -139,17 +139,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="image.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="maths.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="platform\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics.h" />
-    <ClInclude Include="image.h" />
     <ClInclude Include="macro.h" />
-    <ClInclude Include="maths.h" />
+    <ClInclude Include="Math.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="platform.h" />
   </ItemGroup>

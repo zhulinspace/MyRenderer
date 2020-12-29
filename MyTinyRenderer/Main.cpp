@@ -9,7 +9,7 @@ static const int WINDOW_WIDTH = 800;
 static const int WINDOW_HEIGHT = 800;
 
 
-void draw_line(int x0, int y0, int x1, int y1, framebuffer_t* frame, vec4_t color)
+void draw_line(int x0, int y0, int x1, int y1, framebuffer_t* frame, Vec4f color)
 {
     int index = 0;
     bool steep = false;
@@ -44,14 +44,28 @@ void draw_line(int x0, int y0, int x1, int y1, framebuffer_t* frame, vec4_t colo
         }
     }
 }
-void DrawModel(Model& m,framebuffer_t *f, vec4_t color)
+//void draw_triangle(Vec2f *pts,framebuffer_t *frame,Vec4f color)
+//{
+//    Vec2f bboxmin=vec2_new(WINDOW_WIDTH-1, WINDOW_HEIGHT - 1);
+//    Vec2f bboxmax = vec2_new(0, 0);
+//    
+//    for (int i = 0; i < 3; i++)
+//    {
+//        for (int j = 0; j < 2; j++)
+//        {
+//            bboxmin
+//        }
+//    }
+//
+//}
+void DrawModel(Model& m,framebuffer_t *f, Vec4f color)
 {
     for (int i = 0; i < m.nfaces(); i++)
     {
         for (int j = 0; j < 3; j++)
         {
-            vec3_t v0 = m.vert(i, j);
-            vec3_t v1 = m.vert(i, (j + 1) % 3);
+            Vec3f v0 = m.vert(i, j);
+            Vec3f v1 = m.vert(i, (j + 1) % 3);
             int x0 = (v0.x + 1.) * WINDOW_WIDTH / 2;
             int y0 = (v0.y + 1.) * WINDOW_HEIGHT / 2;
             int x1 = (v1.x + 1.) * WINDOW_WIDTH / 2;
@@ -79,7 +93,7 @@ int main()
 	{
 		window_draw_buffer(window, framebuffer);
 		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));
-        DrawModel(m, framebuffer, vec4_new(1.0, 0.0, 0.0, 0.0));
+        DrawModel(m, framebuffer, Vec4f(1.0, 0.0, 0.0, 0.0));
 	}
 	window_destroy(window);
 	framebuffer->framebuffer_release();

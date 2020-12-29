@@ -10,6 +10,9 @@ typedef struct {float x, y, z, w;} quat_t;
 typedef struct {float m[3][3];} mat3_t;
 typedef struct {float m[4][4];} mat4_t;
 
+
+
+
 /* int related functions */
 int int_min(int a, int b);
 int int_max(int a, int b);

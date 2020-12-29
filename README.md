@@ -6,7 +6,10 @@ No third party to construct graphic pipeline
 
 -  Bresenham’s line algorithm 
 
+Rasterization algorithm
 
+- line sweeping
+- barycentric coordinates
 
 ### ref
 
