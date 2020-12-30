@@ -32,16 +32,16 @@
     <ClInclude Include="platform.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="macro.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Math.h">
+    <ClInclude Include="maths.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

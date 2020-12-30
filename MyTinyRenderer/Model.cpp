@@ -17,23 +17,20 @@ Model::Model(const std::string filename) : verts_(), uv_(), norms_(), facet_vrt_
         char trash;
         if (!line.compare(0, 2, "v ")) {
             iss >> trash;
-            Vec3f v;
-           /* for (int i = 0; i < 3; i++) iss >> v[i];*/
-            iss >> v.x >> v.y >> v.z;
+            vec3 v;
+            for (int i = 0; i < 3; i++) iss >> v[i];
             verts_.push_back(v);
         }
         else if (!line.compare(0, 3, "vn ")) {
             iss >> trash >> trash;
-            Vec3f n;
-            /*for (int i = 0; i < 3; i++) iss >> n[i];*/
-            iss >> n.x >> n.y >> n.z;
+            vec3 n;
+            for (int i = 0; i < 3; i++) iss >> n[i];
             norms_.push_back(n.normalize());
         }
         else if (!line.compare(0, 3, "vt ")) {
             iss >> trash >> trash;
-            Vec2f uv;
-            /*for (int i = 0; i < 2; i++) iss >> uv[i];*/
-            iss >> uv.x >> uv.y;
+            vec2 uv;
+            for (int i = 0; i < 2; i++) iss >> uv[i];
             uv_.push_back(uv);
         }
         else if (!line.compare(0, 2, "f ")) {
@@ -68,11 +65,11 @@ int Model::nfaces() const {
     return facet_vrt_.size() / 3;
 }
 
-Vec3f Model::vert(const int i) const {
+vec3 Model::vert(const int i) const {
     return verts_[i];
 }
 
-Vec3f Model::vert(const int iface, const int nthvert) const {
+vec3 Model::vert(const int iface, const int nthvert) const {
     return verts_[facet_vrt_[iface * 3 + nthvert]];
 }
 
@@ -84,26 +81,26 @@ Vec3f Model::vert(const int iface, const int nthvert) const {
 //    img.flip_vertically();
 //}
 //
-//TGAColor Model::diffuse(const Vec2f& uvf) const {
+//TGAColor Model::diffuse(const vec2& uvf) const {
 //    return diffusemap_.get(uvf[0] * diffusemap_.get_width(), uvf[1] * diffusemap_.get_height());
 //}
 
-//Vec3f Model::normal(const Vec2f& uvf) const {
+//vec3 Model::normal(const vec2& uvf) const {
 //    TGAColor c = normalmap_.get(uvf[0] * normalmap_.get_width(), uvf[1] * normalmap_.get_height());
-//    Vec3f res;
+//    vec3 res;
 //    for (int i = 0; i < 3; i++)
 //        res[2 - i] = c[i] / 255. * 2 - 1;
 //    return res;
 //}
 //
-//double Model::specular(const Vec2f& uvf) const {
+//double Model::specular(const vec2& uvf) const {
 //    return specularmap_.get(uvf[0] * specularmap_.get_width(), uvf[1] * specularmap_.get_height())[0];
 //}
 
-Vec2f Model::uv(const int iface, const int nthvert) const {
+vec2 Model::uv(const int iface, const int nthvert) const {
     return uv_[facet_tex_[iface * 3 + nthvert]];
 }
 
-Vec3f Model::normal(const int iface, const int nthvert) const {
+vec3 Model::normal(const int iface, const int nthvert) const {
     return norms_[facet_nrm_[iface * 3 + nthvert]];
 }

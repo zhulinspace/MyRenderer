@@ -2,7 +2,7 @@
 #include<assert.h>
 #include<direct.h>
 #include<string.h>
-#include"../macro.h"
+#include"../utils.h"
 
 #include"../platform.h"
 
@@ -257,7 +257,7 @@ static void present_surface(window_t* window) {
 }
 
 
-static Vec4f get_buffer_value(framebuffer_t* buffer, int row, int col) {
+static vec4 get_buffer_value(framebuffer_t* buffer, int row, int col) {
     int index = row * buffer->width + col;
     return buffer->colorbuffer[index];
 }
@@ -288,7 +288,7 @@ void window_draw_buffer(window_t* window, framebuffer_t* buffer) {
     for (r = 0; r < height; r++) {
         for (c = 0; c < width; c++) {
             int flipped_r = src->height - 1 - r;
-            Vec4f src_value = get_buffer_value(src, flipped_r, c);
+            vec4 src_value = get_buffer_value(src, flipped_r, c);
             unsigned char* dst_pixel = private_get_pixel(dst, r, c);
             dst_pixel[0] = float_to_uchar(src_value.z);  /* blue */
             dst_pixel[1] = float_to_uchar(src_value.y);  /* green */
