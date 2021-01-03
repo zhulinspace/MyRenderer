@@ -1,5 +1,5 @@
 #include"Graphics.h"
-
+#include<limits>
 void framebuffer_t::framebuffer_clear_color(vec4 color) {
     int num_elems = this->width * this->height;
     int i;
@@ -28,7 +28,7 @@ void framebuffer_t::set(int x, int y, vec4 color)
 }
 framebuffer_t::framebuffer_t(int width, int height) {
     vec4 default_color = { 0.0,0.0,0.0, 1 };
-    float default_depth = 1;
+    float default_depth = -std::numeric_limits<float>::max();
     int num_elems = width * height;
    
 

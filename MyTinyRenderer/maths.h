@@ -3,109 +3,111 @@
 #include <cassert>
 #include <iostream>
 
-template<int n> struct vec {
+template<int n,typename t> struct vec {
     vec() = default;
-    double& operator[](const int i) { assert(i >= 0 && i < n); return data[i]; }
-    double   operator[](const int i) const { assert(i >= 0 && i < n); return data[i]; }
-    double norm2() const { return (*this) * (*this); }
-    double norm()  const { return std::sqrt(norm2()); }
-    double data[n] = { 0 };
+    t& operator[](const int i) { assert(i >= 0 && i < n); return data[i]; }
+    t   operator[](const int i) const { assert(i >= 0 && i < n); return data[i]; }
+    t norm2() const { return (*this) * (*this); }
+    t norm()  const { return std::sqrt(norm2()); }
+    t data[n] = { 0 };
 };
 
-template<int n> double operator*(const vec<n>& lhs, const vec<n>& rhs) {
-    double ret = 0;
+template<int n, typename t> double operator*(const vec<n,t>& lhs, const vec<n,t>& rhs) {
+    t ret = 0;
     for (int i = n; i--; ret += lhs[i] * rhs[i]);
     return ret;
 }
 
-template<int n> vec<n> operator+(const vec<n>& lhs, const vec<n>& rhs) {
-    vec<n> ret = lhs;
+template<int n, typename t> vec<n,t> operator+(const vec<n,t>& lhs, const vec<n,t>& rhs) {
+    vec<n,t> ret = lhs;
     for (int i = n; i--; ret[i] += rhs[i]);
     return ret;
 }
 
-template<int n> vec<n> operator-(const vec<n>& lhs, const vec<n>& rhs) {
-    vec<n> ret = lhs;
+template<int n, typename t> vec<n,t> operator-(const vec<n,t>& lhs, const vec<n,t>& rhs) {
+    vec<n,t> ret = lhs;
     for (int i = n; i--; ret[i] -= rhs[i]);
     return ret;
 }
 
-template<int n> vec<n> operator*(const double& rhs, const vec<n>& lhs) {
-    vec<n> ret = lhs;
+template<int n, typename t> vec<n,t> operator*(const t& rhs, const vec<n,t>& lhs) {
+    vec<n,t> ret = lhs;
     for (int i = n; i--; ret[i] *= rhs);
     return ret;
 }
 
-template<int n> vec<n> operator*(const vec<n>& lhs, const double& rhs) {
-    vec<n> ret = lhs;
+template<int n, typename t> vec<n,t> operator*(const vec<n,t>& lhs, const t& rhs) {
+    vec<n,t> ret = lhs;
     for (int i = n; i--; ret[i] *= rhs);
     return ret;
 }
 
-template<int n> vec<n> operator/(const vec<n>& lhs, const double& rhs) {
-    vec<n> ret = lhs;
+template<int n, typename t> vec<n,t> operator/(const vec<n,t>& lhs, const t& rhs) {
+    vec<n,t> ret = lhs;
     for (int i = n; i--; ret[i] /= rhs);
     return ret;
 }
 
-template<int n1, int n2> vec<n1> embed(const vec<n2>& v, double fill = 1) {
-    vec<n1> ret;
+template<int n1, int n2, typename t> vec<n1,t> embed(const vec<n2,t>& v, t fill = 1) {
+    vec<n1,t> ret;
     for (int i = n1; i--; ret[i] = (i < n2 ? v[i] : fill));
     return ret;
 }
 
-template<int n1, int n2> vec<n1> proj(const vec<n2>& v) {
-    vec<n1> ret;
+template<int n1, int n2, typename t> vec<n1,t> proj(const vec<n2,t>& v) {
+    vec<n1,t> ret;
     for (int i = n1; i--; ret[i] = v[i]);
     return ret;
 }
 
 
-template<int n> std::ostream& operator<<(std::ostream& out, const vec<n>& v) {
+template<int n, typename t> std::ostream& operator<<(std::ostream& out, const vec<n,t>& v) {
+    out << "(";
     for (int i = 0; i < n; i++) out << v[i] << " ";
+    out << ")";
     return out;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
-template<> struct vec<2> {
+template<typename t> struct vec<2,t> {
     vec() = default;
-    vec(double X, double Y) : x(X), y(Y) {}
-    double& operator[](const int i) { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
-    double  operator[](const int i) const { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
-    double norm2() const { return (*this) * (*this); }
-    double norm()  const { return std::sqrt(norm2()); }
+    vec(t X, t Y) : x(X), y(Y) {}
+    t& operator[](const int i) { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
+    t  operator[](const int i) const { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
+    t norm2() const { return (*this) * (*this); }
+    t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
 
-    double x{}, y{};
+    t x{}, y{};
 };
 
 /////////////////////////////////////////////////////////////////////////////////
 
-template<> struct vec<3> {
+template<typename t> struct vec<3,t> {
     vec() = default;
-    vec(double X, double Y, double Z) : x(X), y(Y), z(Z) {}
-    double& operator[](const int i) { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
-    double  operator[](const int i) const { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
-    double norm2() const { return (*this) * (*this); }
-    double norm()  const { return std::sqrt(norm2()); }
+    vec(t X, t Y, t Z) : x(X), y(Y), z(Z) {}
+    t& operator[](const int i) { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
+    t  operator[](const int i) const { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
+    t norm2() const { return (*this) * (*this); }
+    t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
-    double x{}, y{}, z{};
+    t x{}, y{}, z{};
 };
 
 /////////////////////////////////////////////////////////////////////////////////
 
 
-template<> struct vec<4> {
+template<typename t> struct vec<4,t> {
     vec() = default;
-    vec(double X, double Y, double Z,double W) : x(X), y(Y), z(Z),w(W) {}
-    double& operator[](const int i) { assert(i >= 0 && i < 4); return i == 0 ? x : (1 == i ? y :(1==2 ? z:w)); }
-    double  operator[](const int i) const { assert(i >= 0 && i <4); return i == 0 ? x : (1 == i ? y : (1 == 2 ? z : w));}
-    double norm2() const { return (*this) * (*this); }
-    double norm()  const { return std::sqrt(norm2()); }
+    vec(t X, t Y, t Z,t W) : x(X), y(Y), z(Z),w(W) {}
+    t& operator[](const int i) { assert(i >= 0 && i < 4); return i == 0 ? x : (1 == i ? y :(1==2 ? z:w)); }
+    t  operator[](const int i) const { assert(i >= 0 && i <4); return i == 0 ? x : (1 == i ? y : (1 == 2 ? z : w));}
+    t norm2() const { return (*this) * (*this); }
+    t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
 
-    double x{}, y{}, z{}, w{};
+    t x{}, y{}, z{}, w{};
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -113,20 +115,20 @@ template<> struct vec<4> {
 template<int n> struct dt;
 
 template<int nrows, int ncols> struct mat {
-    vec<ncols> rows[nrows] = { {} };
+    vec<ncols,double> rows[nrows] = { {} };
 
     mat() = default;
-    vec<ncols>& operator[] (const int idx) { assert(idx >= 0 && idx < nrows); return rows[idx]; }
-    const vec<ncols>& operator[] (const int idx) const { assert(idx >= 0 && idx < nrows); return rows[idx]; }
+    vec<ncols,double>& operator[] (const int idx) { assert(idx >= 0 && idx < nrows); return rows[idx]; }
+    const vec<ncols,double>& operator[] (const int idx) const { assert(idx >= 0 && idx < nrows); return rows[idx]; }
 
-    vec<nrows> col(const int idx) const {
+    vec<nrows,double> col(const int idx) const {
         assert(idx >= 0 && idx < ncols);
         vec<nrows> ret;
         for (int i = nrows; i--; ret[i] = rows[i][idx]);
         return ret;
     }
 
-    void set_col(const int idx, const vec<nrows>& v) {
+    void set_col(const int idx, const vec<nrows,double>& v) {
         assert(idx >= 0 && idx < ncols);
         for (int i = nrows; i--; rows[i][idx] = v[i]);
     }
@@ -178,7 +180,7 @@ template<int nrows, int ncols> struct mat {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-template<int nrows, int ncols> vec<nrows> operator*(const mat<nrows, ncols>& lhs, const vec<ncols>& rhs) {
+template<int nrows, int ncols> vec<nrows,double> operator*(const mat<nrows, ncols>& lhs, const vec<ncols,double>& rhs) {
     vec<nrows> ret;
     for (int i = nrows; i--; ret[i] = lhs[i] * rhs);
     return ret;
@@ -240,10 +242,13 @@ template<> struct dt<1> {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-typedef vec<2> vec2;
-typedef vec<3> vec3;
-typedef vec<4> vec4;
+typedef vec<2,double> vec2;
+typedef vec<3,double> vec3;
+typedef vec<4,double> vec4;
+typedef vec<4, int>vec4i;
+typedef vec<2, int>vec2i;
+
 inline vec3 cross(const vec3& v1, const vec3& v2)
 {
-    return vec<3>{v1.y* v2.z - v1.z * v2.y, v1.z* v2.x - v1.x * v2.z, v1.x* v2.y - v1.y * v2.x};
+    return vec<3,double>{v1.y* v2.z - v1.z * v2.y, v1.z* v2.x - v1.x * v2.z, v1.x* v2.y - v1.y * v2.x};
 }

@@ -1,12 +1,22 @@
 ﻿
 #include<iostream>
+#include<fstream>
 #include"Model.h"
 #include"platform.h"
 
+std::ofstream outputfile;
 
 static const char* WINDOW_TITLE = "Viewer";
 static const int WINDOW_WIDTH = 800;
 static const int WINDOW_HEIGHT = 800;
+
+
+
+
+inline double random_double() {
+    // Returns a random real in [0,1).
+    return rand() / (RAND_MAX + 1.0);
+}
 
 
 void draw_line(int x0, int y0, int x1, int y1, framebuffer_t* frame, vec4 color)
@@ -44,7 +54,7 @@ void draw_line(int x0, int y0, int x1, int y1, framebuffer_t* frame, vec4 color)
         }
     }
 }
-vec3 barycentric(vec2* pnts, vec2 p)
+vec3 barycentric(vec3* pnts, vec3 p)
 { // the point p is in same plane as triangle pnts
   //so we can decribe p =(1-u-v)A+uB+vC;
   // same as  0 = u*Vector(AB) + v*Vector(AC) +Vector(PA)
@@ -56,11 +66,12 @@ vec3 barycentric(vec2* pnts, vec2 p)
     if (std::abs(u[2]) < 1) return vec3(-1, 1, 1);
     return vec3(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
 }
-void draw_triangle(vec2 *pts,framebuffer_t *frame,vec4 color)
+void draw_triangle(vec3 *pts,framebuffer_t *frame,vec4 color)
 {
-    vec2 bboxmin(frame->width-1, frame->height - 1);
-    vec2 bboxmax(0, 0);
-    vec2 clamp(frame->width - 1, frame->height - 1);
+   
+    vec2i bboxmin(frame->width-1, frame->height - 1);
+    vec2i bboxmax(0,0);
+    vec2i clamp(frame->width - 1, frame->height - 1);
     for (int i = 0; i < 3; i++)
     {//个数
         for (int j = 0; j < 2; j++)
@@ -71,14 +82,22 @@ void draw_triangle(vec2 *pts,framebuffer_t *frame,vec4 color)
     }
 
 
-    vec2 p;
-    for (p.x = bboxmin.x; p.x <= bboxmin.x; p.x++)
+    vec3 p;
+    for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++)
     {
-        for (p.y = bboxmax.y; p.y <= bboxmax.y; p.y++)
+        for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++)
         {
             vec3 screen = barycentric(pts, p);
             if (screen.x < 0 || screen.y < 0 || screen.z < 0)continue;
-            frame->set(p.x, p.y, color);
+         
+            p.z = 0;
+            for (int i = 0; i < 3; i++)p.z += pts[i][2] * screen[i];
+            if (frame->depthbuffer[int(p.x + p.y * frame->width)]< p.z)
+            {
+                frame->depthbuffer[int(p.x + p.y * frame->width)] = p.z;
+                frame->set((int)p.x, (int)p.y, color);
+            }
+            //这里zbuffer暂定是越大则离相机越近
         }
     }
 
@@ -105,18 +124,51 @@ void DrawModelTriangle(Model& m, framebuffer_t* f, vec4 color)
 {
     for (int i = 0; i < m.nfaces(); i++)
     {
-        vec2 screen_coords[3];
+        vec3 screen_coords[3];
         for (int j = 0; j < 3; j++)
         {
             vec3 world_coords= m.vert(i, j);
-            screen_coords[j] = vec2((world_coords.x + 1.) / f->width, (world_coords.y + 1.) / f->height);
+            screen_coords[j] = vec3((world_coords.x + 1.)*f->width/2, (world_coords.y + 1.)*f->height/2, world_coords.z);
 
         }
         draw_triangle(screen_coords, f, color);
     }
 }
+
+void DrawModelTriangle(Model& m, framebuffer_t* f)
+{
+    for (int i = 0; i < m.nfaces(); i++)
+    {
+        vec3 screen_coords[3];
+        vec3 world_coords[3];
+        for (int j = 0; j < 3; j++)
+        {
+            world_coords[j] = m.vert(i, j);
+            screen_coords[j] = vec3((world_coords[j].x + 1.) * f->width / 2, (world_coords[j].y + 1.) * f->height / 2,world_coords[j].z);
+
+        }
+        //std::cout << "世界坐标系：" << world_coords[0] << world_coords[1] << world_coords[2] << std::endl;
+        //vec3 n = cross(world_coords[2] - world_coords[1], world_coords[2] - world_coords[0]);
+        vec3 n = cross(world_coords[2] - world_coords[0], world_coords[1] - world_coords[0]);
+
+
+        n.normalize();
+       // std::cout << "法向量：" << n << std::endl;
+        double intensity = n * vec3(0, 0, -1);
+       
+        if (intensity > 0)
+        {
+            //std::cout << "intensity:" << std::endl;
+           // draw_triangle(screen_coords, f, vec4(random_double(), random_double(), random_double(), 1.0));
+            draw_triangle(screen_coords, f, vec4(intensity, intensity, intensity, 1.0));
+        }
+    }
+}
 int main()
 {
+   /* outputfile.open("res.txt", std::ios::app);
+    if (!outputfile)std::cout << "open failed\n";*/
+
 	window_t* window;
     framebuffer_t* framebuffer = new framebuffer_t(WINDOW_WIDTH, WINDOW_HEIGHT);
    
@@ -130,15 +182,19 @@ int main()
 	//the origin is the left_bottom
 	while (!window_should_close(window))
 	{
-		window_draw_buffer(window, framebuffer);
+	  window_draw_buffer(window, framebuffer);
 		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));
-        DrawModelTriangle(m, framebuffer, vec4(rand()%255, rand() % 255, rand() % 255, rand() % 255));
+       //DrawModelTriangle(m, framebuffer, vec4(random_double(),random_double(), random_double(), 1.0));
+       DrawModelTriangle(m, framebuffer);
+      // DrawModelTriangle(m, framebuffer, vec4(1.0, 0, 0, 0.0));
+
 	}
 	window_destroy(window);
 	framebuffer->framebuffer_release();
-	return 0;
+	
 
 
     vec4 t(1, 2, 2, 3);
     std::cout << sizeof(t) << std::endl;
+    return 0;
 }

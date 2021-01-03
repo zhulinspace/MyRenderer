@@ -11,3 +11,5 @@ x64/
 
 *.pyc
 *.cso
+/MyTinyRenderer/res.txt
+/MyTinyRenderer/res/african_head_diffuse.tga
