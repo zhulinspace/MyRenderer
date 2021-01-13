@@ -101,8 +101,8 @@ template<typename t> struct vec<3,t> {
 template<typename t> struct vec<4,t> {
     vec() = default;
     vec(t X, t Y, t Z,t W) : x(X), y(Y), z(Z),w(W) {}
-    t& operator[](const int i) { assert(i >= 0 && i < 4); return i == 0 ? x : (1 == i ? y :(1==2 ? z:w)); }
-    t  operator[](const int i) const { assert(i >= 0 && i <4); return i == 0 ? x : (1 == i ? y : (1 == 2 ? z : w));}
+    t& operator[](const int i) { assert(i >= 0 && i < 4);  return i == 0 ? x : (1 == i ? y :(2==i ? z:w)); }
+    t  operator[](const int i) const { assert(i >= 0 && i <4); return i == 0 ? x : (1 == i ? y : (2 == i ? z : w));}
     t norm2() const { return (*this) * (*this); }
     t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
@@ -115,15 +115,16 @@ template<typename t> struct vec<4,t> {
 template<int n> struct dt;
 
 template<int nrows, int ncols> struct mat {
+  
     vec<ncols,double> rows[nrows] = { {} };
 
     mat() = default;
-    vec<ncols,double>& operator[] (const int idx) { assert(idx >= 0 && idx < nrows); return rows[idx]; }
+    vec<ncols, double>& operator[] (const int idx) { assert(idx >= 0 && idx < nrows); return rows[idx]; }
     const vec<ncols,double>& operator[] (const int idx) const { assert(idx >= 0 && idx < nrows); return rows[idx]; }
 
     vec<nrows,double> col(const int idx) const {
         assert(idx >= 0 && idx < ncols);
-        vec<nrows> ret;
+        vec<nrows,double> ret;
         for (int i = nrows; i--; ret[i] = rows[i][idx]);
         return ret;
     }
@@ -137,6 +138,7 @@ template<int nrows, int ncols> struct mat {
         mat<nrows, ncols> ret;
         for (int i = nrows; i--; )
             for (int j = ncols; j--; ret[i][j] = (i == j));
+       
         return ret;
     }
 
@@ -181,7 +183,7 @@ template<int nrows, int ncols> struct mat {
 /////////////////////////////////////////////////////////////////////////////////
 
 template<int nrows, int ncols> vec<nrows,double> operator*(const mat<nrows, ncols>& lhs, const vec<ncols,double>& rhs) {
-    vec<nrows> ret;
+    vec<nrows,double> ret;
     for (int i = nrows; i--; ret[i] = lhs[i] * rhs);
     return ret;
 }
@@ -247,8 +249,18 @@ typedef vec<3,double> vec3;
 typedef vec<4,double> vec4;
 typedef vec<4, int>vec4i;
 typedef vec<2, int>vec2i;
+typedef mat<4, 4>mat4;
 
 inline vec3 cross(const vec3& v1, const vec3& v2)
 {
     return vec<3,double>{v1.y* v2.z - v1.z * v2.y, v1.z* v2.x - v1.x * v2.z, v1.x* v2.y - v1.y * v2.x};
+}
+/*view matrix and projection matrix*/
+mat4 lookat(vec3 pos, vec3 target, vec3 up);
+
+mat4 proj_matrix(float fovy, float aspect, float near, float far);
+
+////////////////////////////////////////////////
+inline float float_clamp(float f, float min, float max) {
+    return f < min ? min : (f > max ? max : f);
 }

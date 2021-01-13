@@ -14,6 +14,7 @@ public:
 
     /* framebuffer management */
     framebuffer_t(int width, int height);
+    void reset();
     void framebuffer_release();
     void framebuffer_clear_color( vec4 color);
     void framebuffer_clear_depth(float depth);

@@ -21,7 +21,7 @@ int window_should_close(window_t* window);
 void window_set_userdata(window_t* window, void* userdata);
 void* window_get_userdata(window_t* window);
 void window_draw_image(window_t* window, image_t* image);
-void window_draw_buffer(window_t* window, framebuffer_t* buffer);
+void window_draw_buffer(window_t* window, framebuffer_t& buffer);
 
 /* input related functions */
 void input_poll_events(void);

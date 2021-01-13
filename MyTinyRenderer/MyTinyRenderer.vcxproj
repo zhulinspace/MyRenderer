@@ -138,17 +138,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="maths.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="our_gl.cpp" />
     <ClCompile Include="platform\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="maths.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="our_gl.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
