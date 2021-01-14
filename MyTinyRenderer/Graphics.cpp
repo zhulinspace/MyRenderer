@@ -15,7 +15,7 @@ void framebuffer_t::framebuffer_clear_depth(float depth) {
         this->depthbuffer[i] = depth;
     }
 }
-void framebuffer_t::set(int x, int y, vec4 color)
+void framebuffer_t::set(int x, int y, vec4f color)
 {
     if (x < 0 || y < 0 || x >=this->width ||y>=this->height )
         return;

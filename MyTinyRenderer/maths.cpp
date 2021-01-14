@@ -32,3 +32,18 @@ mat4 proj_matrix(float fovy, float aspect, float near, float far)
     m[3][3] = 0;
     return m;
 }
+
+mat4 viewport(int x, int y, int w, int h)
+{
+    //ns=0.fs=1
+    int depth = 255;
+    mat4 m = mat4::identity();
+    m[0][3] = x + w / 2.f;
+    m[1][3] = y + h / 2.f;
+    m[2][3] = 1 / 2.f;
+
+    m[0][0] = w / 2.f;
+    m[1][1] = h / 2.f;
+    m[2][2] = 1 / 2.f;
+    return m;
+}

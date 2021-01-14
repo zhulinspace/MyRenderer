@@ -18,6 +18,6 @@ public:
     void framebuffer_release();
     void framebuffer_clear_color( vec4 color);
     void framebuffer_clear_depth(float depth);
-    void set(int x, int y, vec4 color);
+    void set(int x, int y, vec4f color);
 
 };

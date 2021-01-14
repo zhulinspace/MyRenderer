@@ -15,8 +15,7 @@ public:
 	vec3 target;
 	float aspect;
 	camera(vec3 position,vec3 target,float aspect);
-	mat4 ViewMatrix;
-	mat4 ProjMatrix;
+	
 	~camera();
 
 	void SetCamera(vec3 position,vec3 target);
@@ -27,7 +26,7 @@ public:
 	static vec3 cacluate_offset(vec3 from_target,motion &m);
 	vec3 GetPosition() { return position; }
 	vec3 GetForward() { return (target - position).normalize(); }
-	void GetViewMatrix();
-	void GetProjMatrix();
+	mat4 GetMVPMatrix();
+	
 
 };

@@ -12,42 +12,47 @@ template<int n,typename t> struct vec {
     t data[n] = { 0 };
 };
 
-template<int n, typename t> double operator*(const vec<n,t>& lhs, const vec<n,t>& rhs) {
-    t ret = 0;
+// vector dot product 返回double
+template<int n, typename t1,typename t2> double operator*(const vec<n,t1>& lhs, const vec<n,t2>& rhs) {
+    double ret = 0;
     for (int i = n; i--; ret += lhs[i] * rhs[i]);
     return ret;
 }
 
-template<int n, typename t> vec<n,t> operator+(const vec<n,t>& lhs, const vec<n,t>& rhs) {
-    vec<n,t> ret = lhs;
+//vector plus 返回基准为前一个vector数据类型 t1
+template<int n, typename t1,typename t2> vec<n,t1> operator+(const vec<n,t1>& lhs, const vec<n,t2>& rhs) {
+    vec<n,t1> ret = lhs;
     for (int i = n; i--; ret[i] += rhs[i]);
     return ret;
 }
-
-template<int n, typename t> vec<n,t> operator-(const vec<n,t>& lhs, const vec<n,t>& rhs) {
-    vec<n,t> ret = lhs;
+//vector minus 返回基准为前一个vector数据类型 t1
+template<int n, typename t1, typename t2> vec<n,t1> operator-(const vec<n,t1>& lhs, const vec<n,t2>& rhs) {
+    vec<n,t1> ret = lhs;
     for (int i = n; i--; ret[i] -= rhs[i]);
     return ret;
 }
 
-template<int n, typename t> vec<n,t> operator*(const t& rhs, const vec<n,t>& lhs) {
-    vec<n,t> ret = lhs;
+//数乘 返回基准为t1 
+template<int n, typename t1,typename t2> vec<n,t1> operator*(const t2& rhs, const vec<n,t1>& lhs) {
+    vec<n,t1> ret = lhs;
     for (int i = n; i--; ret[i] *= rhs);
     return ret;
 }
-
-template<int n, typename t> vec<n,t> operator*(const vec<n,t>& lhs, const t& rhs) {
-    vec<n,t> ret = lhs;
+//数乘 返回基准为t1
+template<int n, typename t1, typename t2> vec<n,t1> operator*(const vec<n,t1>& lhs, const t2& rhs) {
+    vec<n,t1> ret = lhs;
     for (int i = n; i--; ret[i] *= rhs);
     return ret;
 }
-
-template<int n, typename t> vec<n,t> operator/(const vec<n,t>& lhs, const t& rhs) {
-    vec<n,t> ret = lhs;
+//vector divide 返回基准为前一个vector数据类型
+template<int n, typename t1,typename t2> vec<n,t1> operator/(const vec<n,t1>& lhs, const t2& rhs) {
+    vec<n,t1> ret = lhs;
     for (int i = n; i--; ret[i] /= rhs);
     return ret;
 }
 
+
+//embed和proj暂定为同一数据类型
 template<int n1, int n2, typename t> vec<n1,t> embed(const vec<n2,t>& v, t fill = 1) {
     vec<n1,t> ret;
     for (int i = n1; i--; ret[i] = (i < n2 ? v[i] : fill));
@@ -73,11 +78,17 @@ template<int n, typename t> std::ostream& operator<<(std::ostream& out, const ve
 template<typename t> struct vec<2,t> {
     vec() = default;
     vec(t X, t Y) : x(X), y(Y) {}
+
+    template<typename type>
+    vec(const vec<2, type>& v) :x(v.x), y(v.y) {}
+
     t& operator[](const int i) { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
     t  operator[](const int i) const { assert(i >= 0 && i < 2); return i == 0 ? x : y; }
     t norm2() const { return (*this) * (*this); }
     t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
+
+   
 
     t x{}, y{};
 };
@@ -87,6 +98,11 @@ template<typename t> struct vec<2,t> {
 template<typename t> struct vec<3,t> {
     vec() = default;
     vec(t X, t Y, t Z) : x(X), y(Y), z(Z) {}
+
+
+    template<typename type>
+    vec(const vec<3, type>& v) :x(v.x), y(v.y) ,z(v.z){}
+
     t& operator[](const int i) { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
     t  operator[](const int i) const { assert(i >= 0 && i < 3); return i == 0 ? x : (1 == i ? y : z); }
     t norm2() const { return (*this) * (*this); }
@@ -101,6 +117,10 @@ template<typename t> struct vec<3,t> {
 template<typename t> struct vec<4,t> {
     vec() = default;
     vec(t X, t Y, t Z,t W) : x(X), y(Y), z(Z),w(W) {}
+
+    template<typename type>
+    vec(const vec<4, type>& v) :x(v.x), y(v.y),z(v.z),w(v.w) {}
+
     t& operator[](const int i) { assert(i >= 0 && i < 4);  return i == 0 ? x : (1 == i ? y :(2==i ? z:w)); }
     t  operator[](const int i) const { assert(i >= 0 && i <4); return i == 0 ? x : (1 == i ? y : (2 == i ? z : w));}
     t norm2() const { return (*this) * (*this); }
@@ -249,7 +269,14 @@ typedef vec<3,double> vec3;
 typedef vec<4,double> vec4;
 typedef vec<4, int>vec4i;
 typedef vec<2, int>vec2i;
+typedef vec<3, int>vec3i;
+typedef vec<4, float>vec4f;
+typedef vec<2, float>vec2f;
+typedef vec<3, float>vec3f;
 typedef mat<4, 4>mat4;
+
+
+
 
 inline vec3 cross(const vec3& v1, const vec3& v2)
 {
@@ -260,6 +287,8 @@ mat4 lookat(vec3 pos, vec3 target, vec3 up);
 
 mat4 proj_matrix(float fovy, float aspect, float near, float far);
 
+
+mat4 viewport(int x, int y, int w, int h);
 ////////////////////////////////////////////////
 inline float float_clamp(float f, float min, float max) {
     return f < min ? min : (f > max ? max : f);

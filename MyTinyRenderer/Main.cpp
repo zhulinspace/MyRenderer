@@ -10,6 +10,7 @@ std::ofstream outputfile;
 static const char* WINDOW_TITLE = "Viewer";
 static const int WINDOW_WIDTH = 800;
 static const int WINDOW_HEIGHT = 800;
+mat4 finalMatrix;
 
 inline double random_double() {
     // Returns a random real in [0,1).
@@ -92,10 +93,53 @@ void draw_triangle(vec3 *pts, framebuffer_t &frame,vec4 color)
             for (int i = 0; i < 3; i++)p.z += pts[i][2] * screen[i];
             if (frame.depthbuffer[int(p.x + p.y * frame.width)]< p.z)
             {
+
+
+
+
+
                 frame.depthbuffer[int(p.x + p.y * frame.width)] = p.z;
                 frame.set((int)p.x, (int)p.y, color);
             }
             //这里zbuffer暂定是越大则离相机越近
+        }
+    }
+
+}
+void draw_triangle(vec3i t0,vec3i t1,vec3i t2,float ity0,float ity1,float ity2,framebuffer_t &f)
+{
+    if (t0.y == t1.y && t0.y == t2.y) return; // i dont care about degenerate triangles
+    if (t0.y > t1.y) { std::swap(t0, t1); std::swap(ity0, ity1); }
+    if (t0.y > t2.y) { std::swap(t0, t2); std::swap(ity0, ity2); }
+    if (t1.y > t2.y) { std::swap(t1, t2); std::swap(ity1, ity2); }
+
+    //用vec3 double则会导致y值插值不正确？
+    int total_height = t2.y - t0.y;
+    
+    for (int i = 0; i < total_height; i++)
+    {
+        bool second_half = i > t1.y - t0.y || t1.y == t0.y;
+        int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
+        float alpha = (float)i / total_height;
+        float beta = (float)(i - (second_half ? t1.y - t0.y : 0)) / segment_height; // be careful: with above conditions no division by zero here
+        vec3i A = t0+vec3f(t2 - t0) * alpha;
+        vec3i B = second_half ? t1+vec3f(t2 - t1) * beta : t0+vec3f(t1 - t0) * beta;
+        float ityA = ity0 + (ity2 - ity0) * alpha;
+        float ityB = second_half ? ity1 + (ity2 - ity1) * beta : ity0 + (ity1 - ity0) * beta;
+        if (A.x > B.x) { std::swap(A, B); std::swap(ityA, ityB); }
+        for (int j = A.x; j <= B.x; j++)
+        {
+            float phi = B.x == A.x ? 1. : (float)(j - A.x) / (B.x - A.x);
+            vec3i    P = vec3f(A) + vec3f(B - A) * phi;
+            float ityP = ityA + (ityB - ityA) * phi;
+            int idx = P.x + P.y *f.width ;
+            if (P.x >= f.width || P.y >= f.height || P.x < 0 || P.y < 0)continue;
+            if (f.depthbuffer[idx] < P.z)
+            {
+                f.depthbuffer[idx] = P.z;
+                f.set(P.x, P.y, vec4(ityP,ityP,ityP,1));
+            }
+
         }
     }
 
@@ -132,34 +176,22 @@ void DrawModelTriangle(Model& m, framebuffer_t &f, vec4 color)
         draw_triangle(screen_coords, f, color);
     }
 }
-mat4 viewport(int x, int y, int w, int h)
-{
-    //ns=0.fs=1
-    int depth = 255;
-    mat4 m = mat4::identity();
-    m[0][3] = x + w / 2.f;
-    m[1][3] = y + h / 2.f;
-    m[2][3] = 1 / 2.f;
 
-    m[0][0] = w / 2.f;
-    m[1][1] = h / 2.f;
-    m[2][2] = 1/ 2.f;
-    return m;
-}
-mat4 vport = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
 void DrawModelTriangle(Model& m,framebuffer_t & f,camera &c)
 {
     for (int i = 0; i < m.nfaces(); i++)
     {
-        vec3 screen_coords[3];
+        vec3i screen_coords[3];
         vec3 world_coords[3];
         //double intensity[3];
         for (int j = 0; j < 3; j++)
         {
            vec3 v= m.vert(i, j);
            world_coords[j] = v;
-           vec4 tmp = vport *  c.ViewMatrix* vec4(v.x, v.y, v.z, 1);
-           screen_coords[j] = vec3(tmp.x,tmp.y,tmp.z); 
+           vec4 tmp = finalMatrix * vec4(v.x, v.y, v.z, 1);
+           
+           screen_coords[j] = vec3i(tmp.x,tmp.y,tmp.z); 
            // screen_coords[j] = vec3((world_coords[j].x + 1.) * f->width / 2, (world_coords[j].y + 1.) * f->height / 2,world_coords[j].z);
            // intensity[j] = m.normal(i, j) * vec3(0, 0, -1);
         }
@@ -178,7 +210,8 @@ void DrawModelTriangle(Model& m,framebuffer_t & f,camera &c)
         {
             //std::cout << "intensity:" << std::endl;
            // draw_triangle(screen_coords, f, vec4(random_double(), random_double(), random_double(), 1.0));
-            draw_triangle(screen_coords, f, vec4(intensity, intensity, intensity, 1.0));
+            //draw_triangle(screen_coords, f, vec4(intensity, intensity, intensity, 1.0));
+            draw_triangle(screen_coords[0], screen_coords[1], screen_coords[2], intensity, intensity, intensity,f);
         }
     }
 }
@@ -339,7 +372,7 @@ int main()
 	{
 
         update_camera(window, cam, &record);
-        cam.GetViewMatrix();
+        finalMatrix = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT) * cam.GetMVPMatrix();
         framebuffer.reset();
 	 
 		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));

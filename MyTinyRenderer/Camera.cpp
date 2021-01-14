@@ -72,12 +72,12 @@ vec3 camera::cacluate_offset(vec3 from_target, motion& m)
 
 }
 
-void camera::GetViewMatrix()
+mat4 camera::GetMVPMatrix()
 {
-	ViewMatrix=lookat(position, target, Up);
+	//VP= proj_matrix(FOVY, aspect, NEAR, FAR)*lookat(position, target, Up);
+	return  lookat(position, target, Up);
 }
 
-void camera::GetProjMatrix()
-{
-	ProjMatrix= proj_matrix(FOVY, aspect, NEAR, FAR);
-}
+
+
+
