@@ -137,7 +137,7 @@ void draw_triangle(vec3i t0,vec3i t1,vec3i t2,float ity0,float ity1,float ity2,f
             if (f.depthbuffer[idx] < P.z)
             {
                 f.depthbuffer[idx] = P.z;
-                f.set(P.x, P.y, vec4(ityP,ityP,ityP,1));
+                f.set(P.x, P.y, vec4f(ityP,ityP,ityP,1));
             }
 
         }
@@ -255,13 +255,13 @@ static vec2 get_pos_delta(vec2 old_pos, vec2 new_pos) {
 static void button_callback(window_t* window, button_t button, int pressed) {
     record_t* record = (record_t*)window_get_userdata(window);
     vec2 cursor_pos = get_cursor_pos(window);
-    std::cout << "the mouse pos" << cursor_pos;
+   
     if (button == BUTTON_L) {
        
         
         float curr_time = platform_get_time();
         if (pressed) {
-            std::cout << "now button_l is pressed\n";
+        
             record->is_orbiting = 1;
             record->orbit_pos = cursor_pos;
             record->press_time = curr_time;
@@ -284,7 +284,6 @@ static void button_callback(window_t* window, button_t button, int pressed) {
     }
     else if (button == BUTTON_R) {
         if (pressed) {
-            std::cout << "now button_r is pressed\n";
             record->is_panning = 1;
             record->pan_pos = cursor_pos;
         }
@@ -296,17 +295,17 @@ static void button_callback(window_t* window, button_t button, int pressed) {
     }
 }
 static void update_camera(window_t* window, camera& camera,
-    record_t* record) {
+    record_t& record) {
     vec2 cursor_pos = get_cursor_pos(window);
-    if (record->is_orbiting) {
-        vec2 pos_delta = get_pos_delta(record->orbit_pos, cursor_pos);
-        record->orbit_delta = record->orbit_delta+ pos_delta;
-        record->orbit_pos = cursor_pos;
+    if (record.is_orbiting) {
+        vec2 pos_delta = get_pos_delta(record.orbit_pos, cursor_pos);
+        record.orbit_delta = record.orbit_delta+ pos_delta;
+        record.orbit_pos = cursor_pos;
     }
-    if (record->is_panning) {
-        vec2 pos_delta = get_pos_delta(record->pan_pos, cursor_pos);
-        record->pan_delta = record->pan_delta+pos_delta;
-        record->pan_pos = cursor_pos;
+    if (record.is_panning) {
+        vec2 pos_delta = get_pos_delta(record.pan_pos, cursor_pos);
+        record.pan_delta = record.pan_delta+pos_delta;
+        record.pan_pos = cursor_pos;
     }
     if (input_key_pressed(window, KEY_SPACE)) {
         camera.SetCamera(CAMERA_POSITION, CAMERA_TARGET);
@@ -314,9 +313,10 @@ static void update_camera(window_t* window, camera& camera,
     }
     else {
         motion motion;
-        motion.orbit = record->orbit_delta;
-        motion.pan = record->pan_delta;
-        motion.dolly = record->dolly_delta;
+        motion.orbit = record.orbit_delta;
+        motion.pan = record.pan_delta;
+        motion.dolly = record.dolly_delta;
+        std::cout << "dolly:" << record.dolly_delta << std::endl;
         camera.OrbitUpdate(motion);
         
     }
@@ -365,21 +365,26 @@ int main()
     input_set_callbacks(window, callbacks);
 
     Model m("res//test.obj");
+    mat4 vp = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    mat4 proj = mat4::identity();
 
 
 	//the origin is the left_bottom
 	while (!window_should_close(window))
 	{
-
-        update_camera(window, cam, &record);
-        finalMatrix = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT) * cam.GetMVPMatrix();
+        proj[3][2] = -1.f / cam.GetForward();
+        update_camera(window, cam, record);
+        finalMatrix =  vp* proj*cam.GetMVPMatrix();
         framebuffer.reset();
 	 
 		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));
        //DrawModelTriangle(m, framebuffer, vec4(random_double(),random_double(), random_double(), 1.0));
-       DrawModelTriangle(m, framebuffer,cam);
+        DrawModelTriangle(m, framebuffer,cam);
       // DrawModelTriangle(m, framebuffer, vec4(1.0, 0, 0, 0.0));
-       window_draw_buffer(window, framebuffer);
+
+        
+        
+        window_draw_buffer(window, framebuffer);
 
        record.orbit_delta = vec2(0, 0);
        record.pan_delta = vec2(0, 0);

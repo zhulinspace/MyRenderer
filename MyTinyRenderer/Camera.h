@@ -25,7 +25,7 @@ public:
 	static vec3 cacluate_pan(vec3 from_camera,motion &m);
 	static vec3 cacluate_offset(vec3 from_target,motion &m);
 	vec3 GetPosition() { return position; }
-	vec3 GetForward() { return (target - position).normalize(); }
+	double GetForward() { return (target - position).norm(); }
 	mat4 GetMVPMatrix();
 	
 

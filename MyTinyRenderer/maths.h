@@ -75,6 +75,8 @@ template<int n, typename t> std::ostream& operator<<(std::ostream& out, const ve
 
 /////////////////////////////////////////////////////////////////////////////////
 
+
+//norm表示长度，norm2表示长度的平方，而normalize表示单位化该向量
 template<typename t> struct vec<2,t> {
     vec() = default;
     vec(t X, t Y) : x(X), y(Y) {}

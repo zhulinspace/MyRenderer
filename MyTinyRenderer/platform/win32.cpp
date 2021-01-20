@@ -295,6 +295,7 @@ void window_draw_buffer(window_t* window, framebuffer_t &buffer) {
             dst_pixel[2] = float_to_uchar(src_value.x);  /* red */
         }
     }
+ // dst->buffer = src.buffertest;
     
     present_surface(window);
 }

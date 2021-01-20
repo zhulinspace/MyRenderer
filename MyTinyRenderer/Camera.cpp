@@ -59,6 +59,7 @@ vec3 camera::cacluate_offset(vec3 from_target, motion& m)
 	float phi = (float)acos(from_target.y / radius);
 	float factor = PI * 2;
 
+	
 	radius *= (float)pow(0.95, m.dolly);
 	theta -= m.orbit.x * factor;
 	phi -= m.orbit.y * factor;
