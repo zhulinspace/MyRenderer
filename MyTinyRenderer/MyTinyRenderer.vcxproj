@@ -144,7 +144,6 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="our_gl.cpp" />
     <ClCompile Include="platform\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,8 +152,8 @@
     <ClInclude Include="image.h" />
     <ClInclude Include="maths.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="our_gl.h" />
     <ClInclude Include="platform.h" />
+    <ClInclude Include="Program.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

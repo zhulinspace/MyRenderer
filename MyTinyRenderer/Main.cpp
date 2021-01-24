@@ -372,9 +372,10 @@ int main()
 	//the origin is the left_bottom
 	while (!window_should_close(window))
 	{
-        proj[3][2] = -1.f / cam.GetForward();
+       
         update_camera(window, cam, record);
-        finalMatrix =  vp* proj*cam.GetMVPMatrix();
+        proj[3][2] = -1.f / cam.GetForward();
+        finalMatrix =  vp* proj*cam.GetViewMatrix();
         framebuffer.reset();
 	 
 		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));

@@ -26,7 +26,7 @@ public:
 	static vec3 cacluate_offset(vec3 from_target,motion &m);
 	vec3 GetPosition() { return position; }
 	double GetForward() { return (target - position).norm(); }
-	mat4 GetMVPMatrix();
+	mat4 GetViewMatrix();
 	
 
 };

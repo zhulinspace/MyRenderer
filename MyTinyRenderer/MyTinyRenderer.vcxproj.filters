@@ -36,9 +36,6 @@
     <ClCompile Include="maths.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="our_gl.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="platform.h">
@@ -62,7 +59,7 @@
     <ClInclude Include="Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="our_gl.h">
+    <ClInclude Include="Program.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
