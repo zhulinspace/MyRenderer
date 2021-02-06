@@ -10,7 +10,10 @@ std::ofstream outputfile;
 static const char* WINDOW_TITLE = "Viewer";
 static const int WINDOW_WIDTH = 800;
 static const int WINDOW_HEIGHT = 800;
-mat4 finalMatrix;
+
+//vertex shader所需的uniform
+mat4 ViewProjMatrix;
+mat4 viewportMatrix;
 
 inline double random_double() {
     // Returns a random real in [0,1).
@@ -106,6 +109,43 @@ void draw_triangle(vec3 *pts, framebuffer_t &frame,vec4 color)
     }
 
 }
+void DrawModelLine(Model& m, std::shared_ptr<framebuffer_t> f, vec4 color)
+{
+    for (int i = 0; i < m.nfaces(); i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            vec3 v0 = m.vert(i, j);
+            vec3 v1 = m.vert(i, (j + 1) % 3);
+            int x0 = (v0.x + 1.) * f->width / 2;
+            int y0 = (v0.y + 1.) * f->height / 2;
+            int x1 = (v1.x + 1.) * f->width / 2;
+            int y1 = (v1.y + 1.) * f->height / 2;
+            draw_line(x0, y0, x1, y1, f, color);
+
+        }
+
+    }
+}
+void DrawModelTriangle(Model& m, framebuffer_t& f, vec4 color)
+{
+    for (int i = 0; i < m.nfaces(); i++)
+    {
+        vec3 screen_coords[3];
+        for (int j = 0; j < 3; j++)
+        {
+            vec3 world_coords = m.vert(i, j);
+            screen_coords[j] = vec3((world_coords.x + 1.) * f.width / 2, (world_coords.y + 1.) * f.height / 2, world_coords.z);
+
+        }
+        draw_triangle(screen_coords, f, color);
+    }
+}
+
+
+
+
+
 void draw_triangle(vec3i t0,vec3i t1,vec3i t2,float ity0,float ity1,float ity2,framebuffer_t &f)
 {
     if (t0.y == t1.y && t0.y == t2.y) return; // i dont care about degenerate triangles
@@ -139,63 +179,98 @@ void draw_triangle(vec3i t0,vec3i t1,vec3i t2,float ity0,float ity1,float ity2,f
                 f.depthbuffer[idx] = P.z;
                 f.set(P.x, P.y, vec4f(ityP,ityP,ityP,1));
             }
-
+            //z-buffer的值都是插值出来的
         }
     }
 
 }
-void DrawModelLine(Model& m, std::shared_ptr<framebuffer_t> f, vec4 color)
+
+enum { X, Y, Z, W };
+#define  MAX_VERTICES_PER_POLYGON 10
+#define W_CLIPPING_PLANE 0.00001
+typedef struct polygon
 {
-    for (int i = 0; i < m.nfaces(); i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            vec3 v0 = m.vert(i, j);
-            vec3 v1 = m.vert(i, (j + 1) % 3);
-            int x0 = (v0.x + 1.) * f->width / 2;
-            int y0 = (v0.y + 1.) * f->height / 2;
-            int x1 = (v1.x + 1.) * f->width / 2;
-            int y1 = (v1.y + 1.) * f->height / 2;
-            draw_line(x0, y0, x1, y1, f, color);
+    unsigned char hs_numVertices;
+    vec4 hs_vetices[MAX_VERTICES_PER_POLYGON];// clip coords
+};
 
-      }
 
-    }
-}
-void DrawModelTriangle(Model& m, framebuffer_t &f, vec4 color)
+
+
+
+void ClipPolygonOnWAxis(polygon* face)//函数参数应该是多边形顶点数组 这里多边形暂定只能为三角形
 {
-    for (int i = 0; i < m.nfaces(); i++)
-    {
-        vec3 screen_coords[3];
-        for (int j = 0; j < 3; j++)
-        {
-            vec3 world_coords= m.vert(i, j);
-            screen_coords[j] = vec3((world_coords.x + 1.)*f.width/2, (world_coords.y + 1.)*f.height/2, world_coords.z);
+    int i;
 
-        }
-        draw_triangle(screen_coords, f, color);
-    }
+    vec4* currentVertices;
+    vec4* previousVertices;
+
+    unsigned char in_numVertices = 0;
+    vec4 in_vertices[MAX_VERTICES_PER_POLYGON];
+
+    char preiousDot, currentDot;
+
+    float intersectionFactor;
+    vec4 intersectionPoint;
+
+    previousVertices = &face->hs_vetices[face->hs_numVertices - 1];
+
+
+
+
+
+
+
+
+
+  
+   
 }
 
+void clipPolygonForAxis(polygon* face, int AXIS)
+{
 
+}
+void clipTriangle(polygon * face)
+{
+    ClipPolygonOnWAxis(face);
+    clipPolygonForAxis(face, X);//w=x,w=-x
+
+
+}
+
+//这个drawmodeltriangle可以作为model类的成员函数draw内容
 void DrawModelTriangle(Model& m,framebuffer_t & f,camera &c)
 {
     for (int i = 0; i < m.nfaces(); i++)
     {
         vec3i screen_coords[3];
         vec3 world_coords[3];
-        //double intensity[3];
+        polygon face;
+        face.hs_numVertices = 3;
         for (int j = 0; j < 3; j++)
         {
+           //1.取出模型坐标系坐标
            vec3 v= m.vert(i, j);
+           //2.乘以model matrix变为world coords,暂时忽略
            world_coords[j] = v;
-           vec4 tmp = finalMatrix * vec4(v.x, v.y, v.z, 1);
+           //3.把world_coords乘以viewproj变为clip coords
+           face.hs_vetices[j] = ViewProjMatrix * embed(world_coords[j]);
+           //4.剪切
+          
            
-           screen_coords[j] = vec3i(tmp.x,tmp.y,tmp.z); 
-           // screen_coords[j] = vec3((world_coords[j].x + 1.) * f->width / 2, (world_coords[j].y + 1.) * f->height / 2,world_coords[j].z);
-           // intensity[j] = m.normal(i, j) * vec3(0, 0, -1);
+           //screen_coords[j] =proj(viewportMatrix*clip_coords[j]); 
+      
         }
-        //draw_triangle(screen_coords, f, vec4(intensity[0], intensity[1], intensity[2], 1));
+
+        //每个三角形都进行一次裁剪
+        clipTriangle(&face);
+     
+        //裁剪完后进行组装三角形
+        //然后透视除法 视口变换
+        //然后背面剔除 
+        //像素化三角形
+        
 
 
 
@@ -209,8 +284,6 @@ void DrawModelTriangle(Model& m,framebuffer_t & f,camera &c)
         if (intensity > 0)
         {
             //std::cout << "intensity:" << std::endl;
-           // draw_triangle(screen_coords, f, vec4(random_double(), random_double(), random_double(), 1.0));
-            //draw_triangle(screen_coords, f, vec4(intensity, intensity, intensity, 1.0));
             draw_triangle(screen_coords[0], screen_coords[1], screen_coords[2], intensity, intensity, intensity,f);
         }
     }
@@ -343,8 +416,7 @@ static void scroll_callback(window_t* window, float offset) {
 }
 int main()
 {
-   /* outputfile.open("res.txt", std::ios::app);
-    if (!outputfile)std::cout << "open failed\n";*/
+ 
     record_t record;
     float aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
     camera cam(CAMERA_POSITION,CAMERA_TARGET,aspect);
@@ -353,19 +425,16 @@ int main()
     callbacks.button_callback = button_callback;
     callbacks.scroll_callback = scroll_callback;
 
-    //
-    
 	window_t* window = window_create(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT);
  
     framebuffer_t framebuffer = framebuffer_t(WINDOW_WIDTH,WINDOW_HEIGHT);
-
     memset(&record, 0, sizeof(record_t));
-    
     window_set_userdata(window, &record);
     input_set_callbacks(window, callbacks);
 
     Model m("res//test.obj");
-    mat4 vp = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    
+    viewportMatrix = viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     mat4 proj = mat4::identity();
 
 
@@ -375,16 +444,10 @@ int main()
        
         update_camera(window, cam, record);
         proj[3][2] = -1.f / cam.GetForward();
-        finalMatrix =  vp* proj*cam.GetViewMatrix();
+        ViewProjMatrix = proj*cam.GetViewMatrix();
         framebuffer.reset();
 	 
-		//draw_line(400, 599, 400, 600, framebuffer, vec4_new(1.0,0.0,0.0,0.0));
-       //DrawModelTriangle(m, framebuffer, vec4(random_double(),random_double(), random_double(), 1.0));
         DrawModelTriangle(m, framebuffer,cam);
-      // DrawModelTriangle(m, framebuffer, vec4(1.0, 0, 0, 0.0));
-
-        
-        
         window_draw_buffer(window, framebuffer);
 
        record.orbit_delta = vec2(0, 0);
@@ -398,7 +461,4 @@ int main()
 	window_destroy(window);
 	framebuffer.framebuffer_release();
 	
-
-
- 
 }

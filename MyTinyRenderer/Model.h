@@ -6,6 +6,7 @@
 
 class Model {
 private:
+    int polygon_size = 3;
     std::vector<vec3> verts_;     // array of vertices
     std::vector<vec2> uv_;        // array of tex coords
     std::vector<vec3> norms_;     // array of normal vectors

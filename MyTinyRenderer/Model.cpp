@@ -73,6 +73,10 @@ vec3 Model::vert(const int iface, const int nthvert) const {
     return verts_[facet_vrt_[iface * 3 + nthvert]];
 }
 
+//我想要model提供一个直接返回三角形指针的函数，每次返回三角形三个顶点这第一个顶点
+
+
+
 //void Model::load_texture(std::string filename, const std::string suffix, TGAImage& img) {
 //    size_t dot = filename.find_last_of(".");
 //    if (dot == std::string::npos) return;

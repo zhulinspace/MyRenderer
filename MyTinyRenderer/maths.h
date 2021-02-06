@@ -58,10 +58,20 @@ template<int n1, int n2, typename t> vec<n1,t> embed(const vec<n2,t>& v, t fill 
     for (int i = n1; i--; ret[i] = (i < n2 ? v[i] : fill));
     return ret;
 }
-
+template<typename t> vec<4, t> embed(const vec<3, t>& v, t fill = 1) {
+    vec<4, t> ret;
+    for (int i = 4; i--; ret[i] = (i < 3 ? v[i] : fill));
+    return ret;
+}
 template<int n1, int n2, typename t> vec<n1,t> proj(const vec<n2,t>& v) {
     vec<n1,t> ret;
     for (int i = n1; i--; ret[i] = v[i]);
+    return ret;
+}
+template<typename t>vec<3, t> proj(const vec<4, t>& v)
+{
+    vec<3, t>ret;
+    for (int i = 3; i--; ret[i] = v[i]);
     return ret;
 }
 
@@ -89,8 +99,6 @@ template<typename t> struct vec<2,t> {
     t norm2() const { return (*this) * (*this); }
     t norm()  const { return std::sqrt(norm2()); }
     vec& normalize() { *this = (*this) / norm(); return *this; }
-
-   
 
     t x{}, y{};
 };
